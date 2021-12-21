@@ -15,10 +15,24 @@ int main()
     scanf("%d", &input);
 
     //num is used to find the total usable host of an ip address2
-    num = pow(2, 32 - input);
-    num -= 2;
-    printf("Total host = %d\n", num);
-    tmp = input;
+    if (input > 0 && input < 32)
+    {
+        num = pow(2, 32 - input);
+        num -= 2;
+        printf("Number of Usable Hosts:	 = %d\n", num);
+    }
+
+    else if (input == 32)
+    {
+        printf("No usabe host \n");
+        num = 0;
+    }
+
+    else
+    {
+        printf("Enter a valid subnet mask\n");
+        return 0;
+    }
 
     //we are taking ip in four parts i.e. a,b,c,d
     printf("Enter ip : ");
@@ -152,30 +166,92 @@ int gettingNetworkId(int a, int b, int c, int d, int net1, int net2, int net3, i
     x3 &= net3;
     x4 &= net4;
 
-    printf("\nnetwork id is %d.%d.%d.%d \n ", x1, x2, x3, x4);
+    printf("\nnetwork id is %d.%d.%d.%d ", x1, x2, x3, x4);
 
     if (input > 24 && input <= 32)
     {
+        printf("\nIP Min : %d.%d.%d.%d\n", x1, x2, x3, x4+1);
+
         for (int i = 0; i < num; i++)
         {
             x4++;
-            printf("%d.%d.%d.%d\n", x1, x2, x3, x4);
+            // printf("%d.%d.%d.%d\n", x1, x2, x3, x4);
         }
+        printf("\nIP Max : %d.%d.%d.%d\n", x1, x2, x3, x4);
+
     }
-    // else if (input > 16 && input <= 24)
-    // {
-    //     for (int i = 0; i < num; i++)
-    //     {
-    //         while(x4<255)
-    //         {
-    //             x4++;
-    //             printf("%d.%d.%d.%d\n", x1, x2, x3, x4);
-                
-    //         }
-    //     }
-    //     x3+=1;
-    //     x4=0;
-    //     continue;  
+
+    else if (input > 16 && input <= 24)
+    {
         
-    // }
+        printf("\nIP Min : %d.%d.%d.%d\n", x1, x2, x3, x4+1);
+
+        for (int i = 0; i < num; i++)
+        {
+            // printf("%d.%d.%d.%d\n", x1, x2, x3, x4);
+            x4++;
+
+            if (x4 > 255)
+            {
+                x4 = 0;
+                x3++;
+            }
+        }
+        printf("\nIP Max : %d.%d.%d.%d\n", x1, x2, x3, x4);
+
+    }
+
+    else if (input > 8 && input <= 16)
+    {
+        printf("\nIP Min : %d.%d.%d.%d\n", x1, x2, x3, x4+1);
+        for (int i = 0; i < num; i++)
+        {
+            // printf("%d.%d.%d.%d\n", x1, x2, x3, x4);
+            x4++;
+
+            if (x4 > 255)
+            {
+                x4 = 0;
+                x3++;
+                if (x3 > 255)
+                {
+                    x3 = 0;
+                    x2++;
+                }
+            }
+        }
+        printf("\nIP Max : %d.%d.%d.%d\n", x1, x2, x3, x4);
+
+    }
+
+    else if (input > 0 && input <= 8)
+    {
+        printf("\nIP Min : %d.%d.%d.%d\n", x1, x2, x3, x4+1);
+        for (int i = 0; i < num; i++)
+        {
+            // printf("%d.%d.%d.%d\n", x1, x2, x3, x4);
+            x4++;
+
+            if (x4 > 255)
+            {
+                x4 = 0;
+                x3++;
+
+                if (x3 > 255)
+                {
+                    x3 = 0;
+                    x2++;
+
+                    if (x2 > 255)
+                    {
+                        x2 = 0;
+                        x1++;
+                    }
+                }
+            }
+        }
+        printf("\nIP Max : %d.%d.%d.%d\n", x1, x2, x3, x4);
+
+
+    }
 }
