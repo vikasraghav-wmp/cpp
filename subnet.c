@@ -7,8 +7,9 @@ int gettingNetworkId(int a, int b, int c, int d, int net1, int net2, int net3, i
 
 int main()
 {
+    
     int input, tmp, num;
-    int net1, net2, net3, net4, a, b, c, d, a1[10], b1[10], c1[10], d1[10];
+    int net1, net2, net3, net4, a, b, c, d, a1, b1, c1, d1;
 
     printf("Enter a subnet mask : ");
     scanf("%d", &input);
@@ -27,6 +28,12 @@ int main()
         num = 0;
     }
 
+    else if (input ==0)
+    {
+        return 0;
+    }
+    
+
     else
     {
         printf("Enter a valid subnet mask\n");
@@ -41,7 +48,9 @@ int main()
     subnetMask(input, &net1, &net2, &net3, &net4);
     // ipInDecimal(a, b, c, d, a1, b1, c1, d1);
     gettingNetworkId(a, b, c, d, net1, net2, net3, net4, num, input);
-    return 0;
+    // return 0;
+
+    
 }
 
 /*This function will convert your input into subnet mask form i.e 24 into 255.255.255.0 form 

@@ -23,7 +23,7 @@ int main()
 
 	//connect
 	int connection_status = connect(network_socket, (struct sockaddr*)&server_addr, sizeof(server_addr));
-	if (connection == -1)
+	if (connection_status == -1)
 	{
 		printf("There was an error making a connection to the remote socket");
 	}

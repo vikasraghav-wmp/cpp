@@ -1,199 +1,82 @@
-
 #include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
-int subnetMask(int input, int *net1, int *net2, int *net3, int *net4);
-int ip(int a, int b, int c, int d);
-int gettingNetworkId(int a, int b, int c, int d, int net1, int net2, int net3, int net4, int num, int input);
+#define TOTAL_IP 256
+
+uint32_t ipToUInt(const char *ip)
+{
+    int a, b, c, d;
+    uint32_t addr = 0;
+
+    if (sscanf(ip, "%d.%d.%d.%d", &a, &b, &c, &d) != 4)
+        return 0;
+
+    addr = a << 24;
+    addr |= b << 16;
+    addr |= c << 8;
+    addr |= d;
+    return addr;
+}
 
 int main()
 {
-    int input, tmp, num;
-    int net1, net2, net3, net4, a, b, c, d, a1[10], b1[10], c1[10], d1[10];
-
-    printf("Enter a subnet mask : ");
-    scanf("%d", &input);
-
-    //num is used to find the total usable host of an ip address by the formula 2^(32-input)
-    if (input > 0 && input < 32)
+    uint32_t mask, network, net_lower = 0, net_upper = 0;
+    int num;
+    int bytes_lw[4];
+    char ip[32];
+    char cidr[50] = "192.168.200.200/23";
+    char *ptr;
+    ptr = strtok(cidr, "/");
+    printf("%s\n", ptr);
+    mask = atoi(strtok(NULL, "/"));
+    if (mask > 0 && mask <= 32)
     {
-        num = pow(2, 32 - input);
-        num -= 2;
-        printf("Number of Usable Hosts:	 = %d\n", num);
+        num = pow(2, 32 - mask);
     }
+    printf("%d\n", mask);
 
-    else if (input == 32)
+    mask = mask ? 0xFFFFFFFF << (32 - mask) : 0; //converting mask into 32 bit for calculating lower and upper subnet
+    printf("mask = %u\n", mask);
+    network = ipToUInt(ptr); //converts IP string to int
+    net_lower = (network & mask);
+    printf("net lower = %u\n", net_lower);
+    net_upper = (net_lower | (~mask));
+    printf("net upper = %u\n", net_upper);
+
+    bytes_lw[0] = net_lower & 0xFF;
+    bytes_lw[1] = (net_lower >> 8) & 0xFF;
+    bytes_lw[2] = (net_lower >> 16) & 0xFF;
+    bytes_lw[3] = (net_lower >> 24) & 0xFF;
+    sprintf(ip, "%d.%d.%d.%d", bytes_lw[3], bytes_lw[2], bytes_lw[1], bytes_lw[0]);
+    printf("ip = %d\n", ip);
+
+    for (int i = 0; i < num; i++)
     {
-        printf("No usabe host \n");
-        num = 0;
-    }
-
-    else
-    {
-        printf("Enter a valid subnet mask\n");
-        return 0;
-    }
-
-    //we are taking ip in four parts i.e. a,b,c,d
-    printf("Enter ip : ");
-    scanf("%d.%d.%d.%d", &a, &b, &c, &d);
-    printf("%d.%d.%d.%d", a, b, c, d);
-
-    subnetMask(input, &net1, &net2, &net3, &net4);
-    // ipInDecimal(a, b, c, d, a1, b1, c1, d1);
-    gettingNetworkId(a, b, c, d, net1, net2, net3, net4, num, input);
-    return 0;
-}
-
-/*This function will convert your input into subnet mask form i.e 24 into 255.255.255.0 form 
-basic formula is used 2^8 - 2^(8-input)
-for 0-8 it will be stored in net1
-for 9-16 it will be stored in net2
-for 17-24 it will be stored in net3
-for 25-32 it will be stored in net4
-*/
-int subnetMask(int input, int *net1, int *net2, int *net3, int *net4)
-{
-    if (input > 0 && input <= 8)
-    {
-        *net1 = pow(2, 8) - pow(2, (8 - input));
-        *net2 = 0;
-        *net3 = 0;
-        *net4 = 0;
-        printf("%ls", net1);
-    }
-
-    else if (input > 8 && input <= 16)
-    {
-        *net1 = 255;
-        input = input - 8;
-        *net2 = pow(2, 8) - pow(2, (8 - input));
-        *net3 = 0;
-        *net4 = 0;
-        printf("%ls", net2);
-    }
-
-    else if (input > 16 && input <= 24)
-    {
-        *net1 = 255;
-        *net2 = 255;
-        input = input - 16;
-        *net3 = pow(2, 8) - pow(2, (8 - input));
-        *net4 = 0;
-        printf("%ls", net3);
-    }
-
-    else if (input > 24 && input <= 32)
-    {
-        *net1 = 255;
-        *net2 = 255;
-        *net3 = 255;
-        input = input - 24;
-        *net4 = pow(2, 8) - pow(2, (8 - input));
-        printf("%ls", net4);
-    }
-
-    else
-        printf("not a subset mask");
-}
-
-
-/*xnor of ip to subnet mask storing in x1,x2,x3,x4
-and operator on x1,2,3,4 to subnet mask (net1,2,3,4) to get the network id and storing its value in x1,x2,x3,x4 again
-*/
-int gettingNetworkId(int a, int b, int c, int d, int net1, int net2, int net3, int net4, int num, int input)
-{
-    int x1, x2, x3, x4;
-    x1 = (a & net1) | ((!a) & (!net1));
-    x2 = (b & net2) | ((!b) & (!net2));
-    x3 = (c & net3) | ((!c) & (!net3));
-    x4 = (d & net4) | ((!d) & (!net4));
-
-    x1 &= net1;
-    x2 &= net2;
-    x3 &= net3;
-    x4 &= net4;
-
-    printf("\nnetwork id is %d.%d.%d.%d ", x1, x2, x3, x4);
-
-    // if (input > 24 && input <= 32)
-    // {
-    //     printf("\nIP Min : %d.%d.%d.%d\n", x1, x2, x3, x4+1);
-
-    //     for (int i = 0; i < num; i++)
-    //     {
-    //         x4++;
-    //     }
-    //     printf("\nIP Max : %d.%d.%d.%d\n", x1, x2, x3, x4);
-
-    // }
-
-    // else if (input > 16 && input <= 24)
-    // {
-        
-    //     printf("\nIP Min : %d.%d.%d.%d\n", x1, x2, x3, x4+1);
-
-    //     for (int i = 0; i < num; i++)
-    //     {
-    //         x4++;
-
-    //         if (x4 > 255)
-    //         {
-    //             x4 = 0;
-    //             x3++;
-    //         }
-    //     }
-    //     printf("\nIP Max : %d.%d.%d.%d\n", x1, x2, x3, x4);
-
-    // }
-
-    // else if (input > 8 && input <= 16)
-    // {
-    //     printf("\nIP Min : %d.%d.%d.%d\n", x1, x2, x3, x4+1);
-    //     for (int i = 0; i < num; i++)
-    //     {
-    //         x4++;
-
-    //         if (x4 > 255)
-    //         {
-    //             x4 = 0;
-    //             x3++;
-    //             if (x3 > 255)
-    //             {
-    //                 x3 = 0;
-    //                 x2++;
-    //             }
-    //         }
-    //     }
-    //     printf("\nIP Max : %d.%d.%d.%d\n", x1, x2, x3, x4);
-
-    // }
-
-    //if (input > 0 && input <= 32)
-    // {
-        printf("\nIP Min : %d.%d.%d.%d\n", x1, x2, x3, x4+1);
-        for (int i = 0; i < num; i++)
+        sprintf(ip, "%d.%d.%d.%d", bytes_lw[3], bytes_lw[2], bytes_lw[1], bytes_lw[0]);
+        printf("ip = %s\n", ip);
+        bytes_lw[0]++;
+        if (bytes_lw[0] > 255)
         {
-            x4++;
+            bytes_lw[0] = 0;
+            bytes_lw[1]++;
 
-            if (x4 > 255)
+            if (bytes_lw[1] > 255)
             {
-                x4 = 0;
-                x3++;
+                bytes_lw[1] = 0;
+                bytes_lw[2]++;
 
-                if (x3 > 255)
+                if (bytes_lw[3] > 255)
                 {
-                    x3 = 0;
-                    x2++;
-
-                    if (x2 > 255)
-                    {
-                        x2 = 0;
-                        x1++;
-                    }
+                    bytes_lw[3] = 0;
+                    bytes_lw[4]++;
                 }
             }
         }
-        printf("\nIP Max : %d.%d.%d.%d\n", x1, x2, x3, x4);
+    }
 
-    // }
+    sprintf(ip, "%d.%d.%d.%d", bytes_lw[3], bytes_lw[2], bytes_lw[1], bytes_lw[0]);
+    // printf("last ip is %s", ip);
+    return 0;
 }
